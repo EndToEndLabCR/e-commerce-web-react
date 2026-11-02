@@ -1,15 +1,9 @@
 import { useEffect, useState } from "react";
-import {
-  type Tee,
-  type TeeSize,
-  type Band,
-} from "@/features/artists/data/artists.data";
+import type { CatalogProduct } from "@/features/catalog/api/catalog-api";
 import styles from "./merch-vault.module.scss";
 
 interface TeeCardProps {
-  tee: Tee;
-  bandName: string;
-  band: Band;
+  product: CatalogProduct;
 }
 
 const ADDED_RESET_MS = 1400;
@@ -17,15 +11,25 @@ const ADDED_RESET_MS = 1400;
 const ADD_TO_CART_TEXT = "ADD TO CART";
 const ADDED_TEXT = "ADDED TO CART";
 
+const DISPLAY_SIZES = ["S", "M", "L"] as const;
+
 /**
- * Single t-shirt card: tag badge, mock merch label, price,
+ * Single t-shirt card: band label, mock merch image, price,
  * size picker (L selected by default when available) and an
  * ADD TO CART micro-interaction.
  */
-const TeeCard: React.FC<TeeCardProps> = ({ tee, bandName }) => {
-  const defaultSize: TeeSize = tee.sizes.includes("L") ? "L" : tee.sizes[0];
-  const [selectedSize, setSelectedSize] = useState<TeeSize>(defaultSize);
+const TeeCard: React.FC<TeeCardProps> = ({ product }) => {
+  const sizes = product.variants
+    .map((variant) => variant.size)
+    .filter((size): size is string => Boolean(size));
+  const defaultSize = sizes.includes("L") ? "L" : (sizes[0] ?? "S");
+  const [selectedSize, setSelectedSize] = useState(defaultSize);
   const [added, setAdded] = useState(false);
+
+  const price = product.variants.length
+    ? Math.min(...product.variants.map((variant) => Number(variant.unitPrice)))
+    : 0;
+  const bandName = product.band?.name ?? "UNKNOWN BAND";
 
   useEffect(() => {
     if (!added) return;
@@ -38,27 +42,29 @@ const TeeCard: React.FC<TeeCardProps> = ({ tee, bandName }) => {
       <div className={styles.media}>
         <span className={styles.tag}>{bandName}</span>
         <div className={styles.imageWrap}>
-          <img
-            src={tee.image}
-            alt={tee.name}
-            className={styles.image}
-            loading="lazy"
-          />
+          {product.imageUrl && (
+            <img
+              src={product.imageUrl}
+              alt={product.name}
+              className={styles.image}
+              loading="lazy"
+            />
+          )}
         </div>
       </div>
 
       <div className={styles.body}>
         <div className={styles.copy}>
-          <h3 className={styles.teeName}>{tee.name}</h3>
-          <p className={styles.teeDesc}>{tee.desc}</p>
+          <h3 className={styles.teeName}>{product.name}</h3>
+          <p className={styles.teeDesc}>{product.description}</p>
         </div>
 
         <div className={styles.buy}>
           <div className={styles.buyRow}>
-            <span className={styles.price}>${tee.price.toFixed(2)}</span>
+            <span className={styles.price}>${price.toFixed(2)}</span>
             <div className={styles.sizes} role="group" aria-label="Size">
-              {(["S", "M", "L"] as const).map((size) => {
-                const available = tee.sizes.includes(size);
+              {DISPLAY_SIZES.map((size) => {
+                const available = sizes.includes(size);
                 if (!available) {
                   return (
                     <button

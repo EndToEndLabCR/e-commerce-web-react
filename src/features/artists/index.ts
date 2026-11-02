@@ -1,1 +1,0 @@
-export { artistsRoutes } from "./routes";

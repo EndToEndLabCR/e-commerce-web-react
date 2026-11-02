@@ -23,7 +23,7 @@ const HomeHero: React.FC = () => {
         <p>
           Our collection captures the raw energy and rebellious spirit of metal music, allowing you to wear your passion proudly.
         </p>
-        <Button type="primary" size="large" className={styles.cta}>
+        <Button type="primary" size="large" className={styles.cta} href="#latest">
           SHOP LATEST DROPS
         </Button>
       </div>

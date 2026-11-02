@@ -1,34 +1,44 @@
-import { BANDS, getBandMatch, type BandId } from "@/features/artists/data/artists.data";
+import type { CatalogBand } from "@/features/catalog/api/catalog-api";
 import styles from "./band-search.module.scss";
 
 interface BandSearchProps {
   bandQuery: string;
-  activeBandId: BandId;
+  bands: CatalogBand[];
+  totalProducts: number;
+  resultCount: number;
+  hasProductNameMatch: boolean;
   onBandQueryChange: (value: string) => void;
-  onQuickSelect: (bandId: BandId) => void;
   onReset: () => void;
 }
 
 /**
- * Section 2 — SEARCH BAND / ARTIST console: band-name search with
- * live match badge + archive counter and CLEAR.
+ * Section 2 — SEARCH BAND / PRODUCT console: product/band search with
+ * live match badge + product counter and CLEAR.
  */
 const BandSearch: React.FC<BandSearchProps> = ({
   bandQuery,
+  bands,
+  totalProducts,
+  resultCount,
+  hasProductNameMatch,
   onBandQueryChange,
   onReset,
 }) => {
   const hasQuery = bandQuery.trim().length > 0;
-  const { matched, count } = getBandMatch(bandQuery);
+  const query = bandQuery.trim().toLowerCase();
+  const matches = query ? bands.filter((band) => band.name.toLowerCase().includes(query)) : [];
+  const matched = matches[0] ?? null;
 
   const counterText = hasQuery
-    ? `${count} ${count === 1 ? "MATCH" : "MATCHES"} FOUND`
-    : "5 BANDS ARCHIVED";
+    ? `${resultCount} ${resultCount === 1 ? "PRODUCT" : "PRODUCTS"} FOUND`
+    : `${totalProducts} PRODUCTS AVAILABLE`;
 
   const badgeText = hasQuery
     ? matched
-      ? `MATCH: ${BANDS[matched].name}`
-      : "NO MATCHING BAND"
+      ? `MATCH: ${matched.name}`
+      : hasProductNameMatch
+        ? "PRODUCT MATCH"
+        : "NO MATCHES"
     : "";
 
   return (
@@ -43,7 +53,7 @@ const BandSearch: React.FC<BandSearchProps> = ({
                 strokeWidth="1.8"
               />
             </svg>
-            <h2>SEARCH BAND / ARTIST</h2>
+            <h2>SEARCH BAND / PRODUCT</h2>
           </div>
           <div className={styles.headingMeta}>
             <span className={styles.counter}>{counterText}</span>
@@ -71,11 +81,15 @@ const BandSearch: React.FC<BandSearchProps> = ({
             type="text"
             value={bandQuery}
             onChange={(event) => onBandQueryChange(event.target.value)}
-            placeholder="TYPE BAND NAME (E.G. DEATH WEAVER, VOID SCREAMER, IRON RITUAL)..."
-            aria-label="Search band or artist"
+            placeholder="TYPE PRODUCT OR BAND NAME (E.G. ÆNEMA TOOL, ASHEN RITES, VOID SCREAMER)..."
+            aria-label="Search product or band"
           />
           {badgeText && (
-            <span className={matched ? styles.matchBadge : styles.matchBadgeMuted}>
+            <span
+              className={
+                matched || hasProductNameMatch ? styles.matchBadge : styles.matchBadgeMuted
+              }
+            >
               {badgeText}
             </span>
           )}

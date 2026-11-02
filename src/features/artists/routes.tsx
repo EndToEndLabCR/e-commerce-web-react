@@ -1,11 +1,11 @@
 import type { RouteConfig } from "@/app/routing/types";
 import { lazyLoad } from "@/app/routing/lazy-loader";
 
-const ArtistsPage = lazyLoad(() => import("@/features/artists/pages"));
+const ProductsPage = lazyLoad(() => import("@/features/artists/pages"));
 
-export const artistsRoutes: RouteConfig[] = [
+export const productsRoutes: RouteConfig[] = [
   {
-    path: "/artists",
-    element: ArtistsPage,
+    path: "/products",
+    element: ProductsPage,
   },
 ];
