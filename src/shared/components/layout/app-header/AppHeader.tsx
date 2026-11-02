@@ -11,7 +11,7 @@ const { Header } = Layout;
 
 const navLinks = [
   { label: "SHOP", to: "/" },
-  { label: "ARTISTS", to: "/artists" },
+  { label: "PRODUCTS", to: "/products" },
   { label: "COLLECTIONS", to: "#collections" },
   { label: "SALE", to: "#sale" },
 ];

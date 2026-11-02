@@ -3,79 +3,71 @@ import { ArtistsHero } from "@/features/artists/components/artists-hero";
 import { BandSearch } from "@/features/artists/components/band-search";
 import { MerchVault } from "@/features/artists/components/merch-vault";
 import {
-  BAND_IDS,
-  BANDS,
-  getBandMatch,
-  type Band,
-  type BandId,
-  type Tee,
-} from "@/features/artists/data/artists.data";
-
-const DEFAULT_BAND_ID: BandId = "death-weaver";
+  useGetProductsQuery,
+  type CatalogBand,
+  type CatalogProduct,
+} from "@/features/catalog/api/catalog-api";
 
 /**
- * Artists roster page (HORDE MERCH // ARTIST ROSTER).
+ * Products page (HORDE MERCH // PRODUCT CATALOG).
  */
 const ArtistsPage: React.FC = () => {
-  const [activeBandId, setActiveBandId] = useState<BandId>(DEFAULT_BAND_ID);
   const [bandQuery, setBandQuery] = useState("");
+  const { data, isLoading, isError, refetch } = useGetProductsQuery({ perPage: 100 });
 
-  const handleBandQueryChange = (value: string) => {
-    setBandQuery(value);
-    const { matched } = getBandMatch(value);
-    if (matched) setActiveBandId(matched);
-  };
+  const products = useMemo<CatalogProduct[]>(() => data?.items ?? [], [data]);
 
-  const handleQuickSelect = (bandId: BandId) => {
-    setBandQuery(BANDS[bandId].name);
-    setActiveBandId(bandId);
-  };
-
-  const handleResetSearch = () => {
-    setBandQuery("");
-    setActiveBandId(DEFAULT_BAND_ID);
-  };
-
-  const allTees = useMemo(() => {
-    const tees: Array<{ tee: Tee; band: Band; bandName: string }> = [];
-    let count = 0;
-    for (const id of BAND_IDS) {
-      for (const tee of BANDS[id].tshirts.slice(0, 2)) {
-        if (count >= 10) break;
-        tees.push({
-          tee,
-          band: BANDS[id],
-          bandName: BANDS[id].name,
-        });
-        count++;
+  const bands = useMemo<CatalogBand[]>(() => {
+    const byId = new Map<string, CatalogBand>();
+    for (const product of products) {
+      if (product.band && !byId.has(product.band.id)) {
+        byId.set(product.band.id, product.band);
       }
-      if (count >= 10) break;
     }
-    return tees;
-  }, []);
+    return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name));
+  }, [products]);
+
+  const allTees = useMemo<CatalogProduct[]>(
+    () => [...products].sort((a, b) => a.name.localeCompare(b.name)),
+    [products],
+  );
+
+  const hasProductNameMatch = useMemo(() => {
+    const query = bandQuery.trim().toLowerCase();
+    return query.length > 0 && allTees.some((product) => product.name.toLowerCase().includes(query));
+  }, [allTees, bandQuery]);
 
   const filteredTees = useMemo(() => {
-    const q = bandQuery.trim().toLowerCase();
-    if (!q) return allTees;
-    const { matched } = getBandMatch(bandQuery);
-    return allTees.filter((item) => {
-      const matchesBand = matched ? item.band.id === matched : false;
-      const matchesProduct = item.tee.name.toLowerCase().includes(q);
-      return matchesBand || matchesProduct;
-    });
-  }, [bandQuery, allTees]);
+    const query = bandQuery.trim().toLowerCase();
+    if (!query) return allTees;
+
+    const matchedBand = bands.find((band) => band.name.toLowerCase().includes(query));
+
+    return allTees.filter(
+      (product) =>
+        (matchedBand ? product.band?.id === matchedBand.id : false) ||
+        product.name.toLowerCase().includes(query),
+    );
+  }, [allTees, bandQuery, bands]);
 
   return (
     <>
       <ArtistsHero />
       <BandSearch
         bandQuery={bandQuery}
-        activeBandId={activeBandId}
-        onBandQueryChange={handleBandQueryChange}
-        onQuickSelect={handleQuickSelect}
-        onReset={handleResetSearch}
+        bands={bands}
+        totalProducts={data?.total ?? 0}
+        resultCount={filteredTees.length}
+        hasProductNameMatch={hasProductNameMatch}
+        onBandQueryChange={setBandQuery}
+        onReset={() => setBandQuery("")}
       />
-      <MerchVault tees={filteredTees} />
+      <MerchVault
+        products={filteredTees}
+        isLoading={isLoading}
+        isError={isError}
+        onRetry={refetch}
+      />
     </>
   );
 };
