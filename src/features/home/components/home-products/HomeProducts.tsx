@@ -1,12 +1,19 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "antd";
+import { Link } from "react-router-dom";
 import { useScrollReveal } from "@/shared/hooks";
-import { products } from "./home-products.data";
+import { useGetProductsQuery, type CatalogProduct } from "@/features/catalog/api/catalog-api";
 import styles from "./home-products.module.scss";
 
 /** One marquee loop duration; the track advances one group width per loop. */
 const MARQUEE_DURATION_MS = 60000;
 const MIN_REPEATS = 3;
+const MAX_PRODUCTS = 16;
+
+const lowestPrice = (product: CatalogProduct): number => {
+  const prices = product.variants.map((variant) => Number(variant.unitPrice));
+  return prices.length ? Math.min(...prices) : 0;
+};
 
 const HomeProducts: React.FC = () => {
   const sectionRef = useScrollReveal<HTMLElement>();
@@ -15,6 +22,12 @@ const HomeProducts: React.FC = () => {
   const groupRef = useRef<HTMLDivElement>(null);
   const [repeats, setRepeats] = useState(MIN_REPEATS);
   const [marqueeUnit, setMarqueeUnit] = useState(0);
+  const { data, isLoading, isError } = useGetProductsQuery({
+    perPage: MAX_PRODUCTS,
+    order: "latest",
+  });
+
+  const products = useMemo(() => data?.items ?? [], [data]);
 
   useEffect(() => {
     const container = marqueeRef.current;
@@ -40,7 +53,7 @@ const HomeProducts: React.FC = () => {
       observer.disconnect();
       window.removeEventListener("resize", measure);
     };
-  }, []);
+  }, [products.length]);
 
   // Drive the loop with the Web Animations API so the per-loop distance is an
   // exact measured value, keeping the seam seamless in every browser (incl. Safari).
@@ -73,61 +86,67 @@ const HomeProducts: React.FC = () => {
   const marqueeGroups = Array.from({ length: repeats }, () => products);
 
   return (
-    <section className={styles.section} ref={sectionRef}>
+    <section className={styles.section} id="latest" ref={sectionRef}>
       <div className={styles.heading} data-reveal>
         <h2>LATEST ARRIVALS</h2>
-        <a href="#latest" className={styles.viewAll}>
+        <Link to="/products" className={styles.viewAll}>
           <span>VIEW ALL</span>
           <span className={styles.viewAllArrow}>→</span>
-        </a>
+        </Link>
       </div>
-      <div className={styles.marquee} data-reveal ref={marqueeRef}>
-        <div className={styles.track} ref={trackRef}>
-          {marqueeGroups.map((group, groupIndex) => (
-            <div
-              key={groupIndex}
-              className={styles.group}
-              ref={groupIndex === 0 ? groupRef : undefined}
-              aria-hidden={groupIndex > 0}
-            >
-              {group.map((product) => (
-                <article key={product.name} className={styles.card}>
-                  <div className={styles.cardMedia}>
-                    <img
-                      src={product.image}
-                      alt={`${product.name} t-shirt`}
-                      className={styles.cardImage}
-                    />
-                    {product.badge && (
-                      <span
-                        className={`${styles.badge} ${
-                          product.badge.variant === "paper"
-                            ? styles.badgePaper
-                            : styles.badgeBlood
-                        }`}
+
+      {isLoading && <p className={styles.status}>LOADING LATEST ARRIVALS…</p>}
+
+      {!isLoading && isError && (
+        <p className={styles.status}>UNABLE TO LOAD LATEST ARRIVALS. CHECK THE API CONNECTION.</p>
+      )}
+
+      {!isLoading && !isError && products.length === 0 && (
+        <p className={styles.status}>NO PRODUCTS AVAILABLE.</p>
+      )}
+
+      {products.length > 0 && (
+        <div className={styles.marquee} ref={marqueeRef}>
+          <div className={styles.track} ref={trackRef}>
+            {marqueeGroups.map((group, groupIndex) => (
+              <div
+                key={groupIndex}
+                className={styles.group}
+                ref={groupIndex === 0 ? groupRef : undefined}
+                aria-hidden={groupIndex > 0}
+              >
+                {group.map((product) => (
+                  <article key={product.id} className={styles.card}>
+                    <div className={styles.cardMedia}>
+                      {product.imageUrl && (
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                          className={styles.cardImage}
+                        />
+                      )}
+                    </div>
+                    <div className={styles.cardBody}>
+                      <h3 className={styles.cardTitle} title={product.name}>
+                        {product.name}
+                      </h3>
+                      <p className={styles.cardPrice}>${lowestPrice(product).toFixed(2)}</p>
+                      <Button
+                        type="default"
+                        block
+                        className={styles.addToCart}
+                        tabIndex={groupIndex > 0 ? -1 : undefined}
                       >
-                        {product.badge.label}
-                      </span>
-                    )}
-                  </div>
-                  <div className={styles.cardBody}>
-                    <h3 className={styles.cardTitle}>{product.name}</h3>
-                    <p className={styles.cardPrice}>{product.price}</p>
-                    <Button
-                      type="default"
-                      block
-                      className={styles.addToCart}
-                      tabIndex={groupIndex > 0 ? -1 : undefined}
-                    >
-                      ADD TO CART
-                    </Button>
-                  </div>
-                </article>
-              ))}
-            </div>
-          ))}
+                        ADD TO CART
+                      </Button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 };
