@@ -17,154 +17,6 @@
   }
 }
 
-// ── Console (header + filter status) ────────────────────────
-.console {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-  background: var(--color-surface-white);
-  border: 1px solid var(--color-surface-base);
-}
-
-.consoleRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.consoleTitle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  h3 {
-    margin: 0;
-    font-size: 1.25rem;
-    line-height: 1;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-    color: var(--color-text-primary);
-  }
-}
-
-.countBadge {
-  font-family: var(--font-family-label);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--color-outline);
-}
-
-.sort {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.sortLabel {
-  font-family: var(--font-family-label);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--color-outline);
-}
-
-.sortSelect {
-  padding: 6px 8px;
-  background: var(--color-surface-container);
-  border: 1px solid var(--color-surface-base);
-  color: var(--color-text-primary);
-  cursor: pointer;
-  font-family: var(--font-family-label);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  outline: none;
-
-  &:hover {
-    border-color: var(--color-outline-variant);
-  }
-}
-
-.filterStatus {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-
-  svg {
-    width: 14px;
-    height: 14px;
-    color: var(--color-tertiary);
-  }
-}
-
-.filterLabel {
-  font-family: var(--font-family-label);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--color-outline);
-}
-
-.filterPill {
-  padding: 2px 8px;
-  background: var(--color-primary);
-  color: var(--color-text-on-dark);
-  font-family: var(--font-family-label);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.filterActions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.hint {
-  font-family: var(--font-family-label);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--color-outline);
-}
-
-.reset {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  font-family: var(--font-family-label);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--color-outline);
-  transition: color 0.2s;
-
-  svg {
-    width: 14px;
-    height: 14px;
-  }
-
-  &:hover {
-    color: var(--color-tertiary);
-  }
-}
-
 // ── Tee grid ────────────────────────────────────────────────
 .grid {
   display: grid;
@@ -213,36 +65,6 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-
-  &[data-tone="blood"] {
-    background: var(--color-primary);
-    color: var(--color-text-on-dark);
-  }
-
-  &[data-tone="inverse"] {
-    background: var(--color-paper-white);
-    color: var(--color-obsidian-black);
-  }
-
-  &[data-tone="neutral"] {
-    background: var(--color-surface-container);
-    color: var(--color-text-primary);
-  }
-}
-
-.fabric {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 1;
-  padding: 2px 6px;
-  background: var(--color-surface-container);
-  color: var(--color-outline);
-  font-family: var(--font-family-label);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
 }
 
 .imageWrap {
@@ -276,15 +98,6 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-}
-
-.merchLabel {
-  font-family: var(--font-family-label);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--color-outline);
 }
 
 .teeName {
@@ -410,43 +223,6 @@
   color: var(--color-text-on-dark) !important;
 }
 
-// ── Empty state ─────────────────────────────────────────────
-.empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 64px 16px;
-  text-align: center;
-  background: var(--color-surface-white);
-  border: 1px solid var(--color-surface-base);
-
-  svg {
-    width: 40px;
-    height: 40px;
-    margin-bottom: 8px;
-    color: var(--color-outline);
-  }
-}
-
-.emptyTitle {
-  margin: 0;
-  font-size: 1.25rem;
-  line-height: 1.1;
-  text-transform: uppercase;
-  color: var(--color-text-primary);
-}
-
-.emptyHint {
-  margin: 0;
-  font-family: var(--font-family-label);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--color-outline);
-}
-
 // ── Dispatch bar ────────────────────────────────────────────
 .dispatch {
   display: flex;
@@ -562,4 +338,39 @@
   color: var(--color-text-on-dark) !important;
   border-color: var(--color-primary) !important;
   font-weight: 700;
+}
+
+// ── Data states ─────────────────────────────────────────────
+.status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 24px;
+  background: var(--color-surface-white);
+  border: 1px solid var(--color-surface-base);
+  font-family: var(--font-family-label);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-outline);
+}
+
+.retry {
+  padding: 8px 12px;
+  background: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  color: var(--color-text-on-dark);
+  font-family: var(--font-family-label);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.85;
+  }
 }
