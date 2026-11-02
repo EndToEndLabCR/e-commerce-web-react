@@ -4,8 +4,6 @@
  * NOTE: Only variables prefixed with `VITE_` are exposed to the client.
  */
 
-export const ENV = import.meta.env.VITE_ENV ?? "local";
-
 export const BASE_API_URL =
   import.meta.env.VITE_BASE_API_URL ?? "http://127.0.0.1:8000";
 
