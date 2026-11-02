@@ -1,65 +1,67 @@
-import { useEffect, useMemo, useState } from "react";
-import { type Band, type Tee } from "@/features/artists/data/artists.data";
+import { useEffect, useState } from "react";
+import type { CatalogProduct } from "@/features/catalog/api/catalog-api";
 import TeeCard from "./TeeCard";
 import styles from "./merch-vault.module.scss";
 
-interface MerchItem {
-  tee: Tee;
-  band: Band;
-  bandName: string;
-}
-
 interface MerchVaultProps {
-  band?: Band;
-  tees?: MerchItem[];
+  products: CatalogProduct[];
+  isLoading?: boolean;
+  isError?: boolean;
+  onRetry?: () => void;
 }
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 18;
 
 /**
  * Section 4 — Exclusive t-shirt merchandise vault.
  */
-const MerchVault: React.FC<MerchVaultProps> = ({ band, tees: teesProp }) => {
+const MerchVault: React.FC<MerchVaultProps> = ({ products, isLoading, isError, onRetry }) => {
   const [currentPage, setCurrentPage] = useState(1);
-
-  const tees = useMemo(() => {
-    if (teesProp) {
-      return teesProp;
-    }
-    if (band) {
-      return band.tshirts.map((tee) => ({
-        tee,
-        band,
-        bandName: band.name,
-      }));
-    }
-    return [];
-  }, [band, teesProp]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [teesProp, band]);
+  }, [products]);
 
-  const totalPages = Math.ceil(tees.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedTees = tees.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const paginatedTees = products.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const showGrid = !isLoading && !isError && products.length > 0;
+
   return (
     <section className={styles.section}>
       <div className={styles.container}>
+        {isLoading && <p className={styles.status}>LOADING ARCHIVE…</p>}
 
-        <div className={styles.grid}>
-          {paginatedTees.map((item, index) => (
-            <TeeCard key={`${item.band.id}-${item.tee.id}-${index}`} tee={item.tee} bandName={item.bandName} band={item.band} />
-          ))}
-        </div>
+        {!isLoading && isError && (
+          <div className={styles.status}>
+            <span>ARCHIVE UNAVAILABLE. CHECK THE API CONNECTION.</span>
+            {onRetry && (
+              <button type="button" className={styles.retry} onClick={() => onRetry()}>
+                RETRY
+              </button>
+            )}
+          </div>
+        )}
 
-        {totalPages > 1 && (
+        {!isLoading && !isError && products.length === 0 && (
+          <p className={styles.status}>NO MERCHANDISE MATCHES THE CURRENT FILTER.</p>
+        )}
+
+        {showGrid && (
+          <div className={styles.grid}>
+            {paginatedTees.map((product) => (
+              <TeeCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
+
+        {showGrid && totalPages > 1 && (
           <div className={styles.pagination}>
             <button
               type="button"
